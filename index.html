@@ -566,6 +566,17 @@ input, select, textarea { font-family: Arial, sans-serif; font-size: 13px; }
     </div>
   </div>
   <div class="filter-group">
+    <span class="filter-label">Pillar</span>
+    <div class="filter-chips">
+      <button class="chip active" data-filter="pillar" data-value="all" onclick="setFilter('pillar','all',this)">All</button>
+      <button class="chip" data-filter="pillar" data-value="Shopify" onclick="setFilter('pillar','Shopify',this)">Shopify</button>
+      <button class="chip" data-filter="pillar" data-value="Marketing" onclick="setFilter('pillar','Marketing',this)">Marketing</button>
+      <button class="chip" data-filter="pillar" data-value="Suppliers" onclick="setFilter('pillar','Suppliers',this)">Suppliers</button>
+      <button class="chip" data-filter="pillar" data-value="Pricing" onclick="setFilter('pillar','Pricing',this)">Pricing</button>
+      <button class="chip" data-filter="pillar" data-value="Customers" onclick="setFilter('pillar','Customers',this)">Customers</button>
+    </div>
+  </div>
+  <div class="filter-group">
     <button id="toggle-done-btn" class="chip" onclick="toggleHideDone()" style="font-size:12px;padding:4px 12px;">Show Done</button>
   </div>
   <div class="filter-count" id="task-count">Loading...</div>
@@ -672,6 +683,19 @@ input, select, textarea { font-family: Arial, sans-serif; font-size: 13px; }
           <input type="date" id="f-due" />
         </div>
       </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label class="form-label" for="f-pillar">Pillar</label>
+          <select id="f-pillar">
+            <option value="">-- Select --</option>
+            <option value="Shopify">Shopify</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Suppliers">Suppliers</option>
+            <option value="Pricing">Pricing</option>
+            <option value="Customers">Customers</option>
+          </select>
+        </div>
+      </div>
     </div>
     <div class="modal-foot">
       <button class="btn-cancel" onclick="closeModal()">Cancel</button>
@@ -702,7 +726,7 @@ try {
 
 // ══ STATE ════════════════════════════════════════════════════════════════════
 let allTasks = [];
-let filters  = { assignee: 'all', priority: 'all' };
+let filters  = { assignee: 'all', priority: 'all', pillar: 'all' };
 let hideDone = true;
 
 // ══ PRIORITY CONFIG ══════════════════════════════════════════════════════════
@@ -758,6 +782,7 @@ function filtered() {
     if (hideDone && t.status === 'done') return false;
     if (filters.assignee !== 'all' && t.assignee !== filters.assignee) return false;
     if (filters.priority !== 'all' && t.priority !== filters.priority) return false;
+    if (filters.pillar !== 'all' && (t.pillar || '') !== filters.pillar) return false;
     return true;
   });
 }
@@ -797,6 +822,7 @@ function renderCard(t) {
   const over   = isOverdue(t.due_date, t.status);
   const dueStr = t.due_date ? fmtDate(t.due_date) : '';
   const desc   = t.description ? `<div class="card-desc">${esc(t.description)}</div>` : '';
+  const pillar = t.pillar ? `<span style="font-size:10px;background:#f0e8d0;color:#8B6914;border-radius:3px;padding:2px 6px;font-weight:600;">${esc(t.pillar)}</span>` : '';
   const due    = dueStr ? `<span class="card-due${over?' overdue':''}">${over?'Overdue: ':'Due: '}${dueStr}</span>` : '';
 
   return `
@@ -805,6 +831,7 @@ function renderCard(t) {
     <div class="card-title">${esc(t.title)}</div>
     <span class="card-priority" style="background:${p.bg};color:${p.color}">${p.label}</span>
   </div>
+  ${pillar ? `<div style="margin:4px 0 2px;">${pillar}</div>` : ''}
   ${desc}
   <div class="card-footer">
     <div class="card-assignee">
@@ -858,6 +885,7 @@ function openModal(task) {
   document.getElementById('f-priority').value = task ? task.priority : 'medium';
   document.getElementById('f-status').value   = task ? task.status : 'todo';
   document.getElementById('f-due').value      = task ? (task.due_date || '') : '';
+  document.getElementById('f-pillar').value   = task ? (task.pillar || '') : '';
   document.getElementById('modal-bg').classList.add('open');
   document.getElementById('f-title').focus();
 }
@@ -892,6 +920,7 @@ async function saveTask() {
     priority:    document.getElementById('f-priority').value,
     status:      document.getElementById('f-status').value,
     due_date:    document.getElementById('f-due').value || null,
+    pillar:      document.getElementById('f-pillar').value || null,
     updated_at:  new Date().toISOString(),
   };
 

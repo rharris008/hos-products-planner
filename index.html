@@ -565,6 +565,9 @@ input, select, textarea { font-family: Arial, sans-serif; font-size: 13px; }
       <button class="chip" data-filter="priority" data-value="low" onclick="setFilter('priority','low',this)">Low</button>
     </div>
   </div>
+  <div class="filter-group">
+    <button id="toggle-done-btn" class="chip" onclick="toggleHideDone()" style="font-size:12px;padding:4px 12px;">Show Done</button>
+  </div>
   <div class="filter-count" id="task-count">Loading...</div>
 </div>
 
@@ -700,6 +703,7 @@ try {
 // ══ STATE ════════════════════════════════════════════════════════════════════
 let allTasks = [];
 let filters  = { assignee: 'all', priority: 'all' };
+let hideDone = true;
 
 // ══ PRIORITY CONFIG ══════════════════════════════════════════════════════════
 const PRIORITY = {
@@ -741,8 +745,17 @@ function setFilter(type, value, el) {
   renderBoard();
 }
 
+function toggleHideDone() {
+  hideDone = !hideDone;
+  const btn = document.getElementById('toggle-done-btn');
+  btn.textContent = hideDone ? 'Show Done' : 'Hide Done';
+  btn.classList.toggle('active', !hideDone);
+  renderBoard();
+}
+
 function filtered() {
   return allTasks.filter(t => {
+    if (hideDone && t.status === 'done') return false;
     if (filters.assignee !== 'all' && t.assignee !== filters.assignee) return false;
     if (filters.priority !== 'all' && t.priority !== filters.priority) return false;
     return true;
@@ -850,7 +863,7 @@ function openModal(task) {
 }
 
 function openEdit(id) {
-  const t = allTasks.find(t => t.id === id);
+  const t = allTasks.find(t => String(t.id) === String(id));
   if (t) openModal(t);
 }
 

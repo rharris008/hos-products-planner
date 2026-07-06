@@ -814,7 +814,15 @@ function renderBoard() {
 
 function renderCards(tasks) {
   if (!tasks.length) return '<div class="empty-col">No tasks</div>';
-  return tasks.map(t => renderCard(t)).join('');
+  const sorted = [...tasks].sort((a, b) => {
+    const aOver = isOverdue(a.due_date, a.status) ? 0 : 1;
+    const bOver = isOverdue(b.due_date, b.status) ? 0 : 1;
+    if (aOver !== bOver) return aOver - bOver;
+    const aD = a.due_date || 'zzzz';
+    const bD = b.due_date || 'zzzz';
+    return aD < bD ? -1 : aD > bD ? 1 : 0;
+  });
+  return sorted.map(t => renderCard(t)).join('');
 }
 
 function renderCard(t) {
